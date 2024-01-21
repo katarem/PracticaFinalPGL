@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import pgl.practicafinalpgl.pantallas.Router
 import pgl.practicafinalpgl.ui.theme.PracticaFinalPGLTheme
 
 class MainActivity : ComponentActivity() {
@@ -17,13 +18,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PracticaFinalPGLTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
+                Router()
             }
         }
     }
