@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "601582201470",
+    "project_id": "piratify-727a9",
+    "storage_bucket": "piratify-727a9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:601582201470:android:f0842ce23153089769462f",
+        "android_client_info": {
+          "package_name": "pgl.practicafinalpgl"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlwuTRLhueIWU2PXUksXZc81Xvr-GPzKc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
