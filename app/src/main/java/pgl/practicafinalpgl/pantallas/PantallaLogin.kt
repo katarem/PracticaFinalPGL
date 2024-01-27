@@ -1,8 +1,10 @@
 package io.github.katarem.piratify.pantallas
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -154,14 +156,17 @@ fun PantallaLoginPreview() {
     PantallaLogin()
 }
 
+
 @Composable
 fun Logo() {
+    val context = LocalContext.current
     Image(
         painter = painterResource(id = R.drawable.piratify),
         contentDescription = "Logo",
         modifier = Modifier
             .size(200.dp)
             .padding(16.dp)
+            .clickable { loginUser(context, "testing@testing.es", "testing", {}) }
     )
 }
 
