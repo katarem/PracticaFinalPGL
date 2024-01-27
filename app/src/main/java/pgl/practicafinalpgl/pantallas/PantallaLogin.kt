@@ -52,6 +52,9 @@ import pgl.practicafinalpgl.utils.AppColors
 fun PantallaLogin(onLoginClick: () -> Unit, onSinginClick: () -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val errorPass by remember {
+        mutableStateOf("")
+    }
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -66,6 +69,7 @@ fun PantallaLogin(onLoginClick: () -> Unit, onSinginClick: () -> Unit) {
             onUsernameChange = { username = it },
             password = password,
             onPasswordChange = { password = it },
+            errorPass = errorPass,
             onLoginClick = onLoginClick,
             onSinginClick = onSinginClick,
             focusManager = focusManager,
@@ -81,6 +85,7 @@ fun ContenidoLogin(
     onUsernameChange: (String) -> Unit,
     password: String,
     onPasswordChange: (String) -> Unit,
+    errorPass: String,
     onLoginClick: () -> Unit,
     onSinginClick: () -> Unit,
     focusManager: FocusManager,
@@ -107,6 +112,8 @@ fun ContenidoLogin(
             onLoginClick = onLoginClick,
             keyboardController = keyboardController
         )
+
+        Text(text = errorPass)
 
         Spacer(modifier = Modifier.height(16.dp))
 

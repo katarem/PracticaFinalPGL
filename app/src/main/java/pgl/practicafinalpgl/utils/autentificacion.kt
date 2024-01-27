@@ -10,7 +10,7 @@ import pgl.practicafinalpgl.Rutas.Rutas.PantallaReproductor
 
 class autentificacion {
 
-    fun loginUser(context: Context, email: String, password: String) {
+    fun loginUser(context: Context, email: String, password: String, ) {
         val auth = FirebaseAuth.getInstance()
 
         auth.signInWithEmailAndPassword(email, password)
@@ -22,7 +22,8 @@ class autentificacion {
                     context.startActivity(intent)
                 } else {
                     val errorMessage = "Ha habido algún problema: ${task.exception?.localizedMessage}"
-                    Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show(
+
                 }
             }
     }
