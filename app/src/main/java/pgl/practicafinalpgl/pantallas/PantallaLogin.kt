@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -46,13 +47,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pgl.practicafinalpgl.R
 import pgl.practicafinalpgl.utils.AppColors
+import pgl.practicafinalpgl.utils.loginUser
+import pgl.practicafinalpgl.utils.registerUser
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun PantallaLogin(onLoginClick: () -> Unit, onSinginClick: () -> Unit) {
+fun PantallaLogin() {
+    val context = LocalContext.current
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val errorPass by remember {
+    val errorPass = remember {
         mutableStateOf("")
     }
 
@@ -69,9 +73,13 @@ fun PantallaLogin(onLoginClick: () -> Unit, onSinginClick: () -> Unit) {
             onUsernameChange = { username = it },
             password = password,
             onPasswordChange = { password = it },
-            errorPass = errorPass,
-            onLoginClick = onLoginClick,
-            onSinginClick = onSinginClick,
+            errorPass = errorPass.value,
+            onLoginClick = { loginUser(context,username,password){
+                errorPass.value = "Contraseña incorrecta"
+            } },
+            onSinginClick = { registerUser(context,username,password){
+                errorPass.value = "Correo o contraseña inválidos"
+            } },
             focusManager = focusManager,
             keyboardController = keyboardController
         )
@@ -113,7 +121,9 @@ fun ContenidoLogin(
             keyboardController = keyboardController
         )
 
-        Text(text = errorPass)
+        Text(text = errorPass,
+            color = Color.Red,
+            fontSize = 16.sp)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -122,7 +132,7 @@ fun ContenidoLogin(
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
         ) {
             TextoRegistro(onSigninClick = onSinginClick)
         }
@@ -141,7 +151,7 @@ fun ContenidoLogin(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PantallaLoginPreview() {
-    PantallaLogin(onLoginClick = {}, onSinginClick = {})
+    PantallaLogin()
 }
 
 @Composable
