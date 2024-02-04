@@ -1,7 +1,7 @@
 package pgl.practicafinalpgl.db
 
 interface Repository<T> {
-    var repository: List<T>
+    var repository: ArrayList<T>
     fun insert(t: T)
     fun getById(t: T): T
     fun getAll(): List<T>

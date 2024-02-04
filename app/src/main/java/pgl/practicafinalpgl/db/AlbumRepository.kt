@@ -4,23 +4,35 @@ import pgl.practicafinalpgl.model.Album
 
 class AlbumRepository: Repository<Album> {
 
-    override var repository = listOf<Album>()
+    override var repository = arrayListOf<Album>()
     override fun insert(t: Album) {
-        TODO("Not yet implemented")
+        this.repository.add(t)
     }
     override fun getById(t: Album): Album {
-        TODO("Not yet implemented")
+        return this.repository.stream().filter{album -> album.id == t.id}.findAny().orElse(null)
     }
 
     override fun getAll(): List<Album> {
-        TODO("Not yet implemented")
+        return this.repository
     }
 
     override fun update(t: Album): Boolean {
-        TODO("Not yet implemented")
+        val old = this.repository.stream().filter{album -> album.id == t.id}.findAny().orElse(null)
+        if(old != null){
+            this.repository.remove(old)
+            this.repository.add(t)
+            return true
+        }
+        return false
     }
 
     override fun remove(t: Album): Boolean {
-        TODO("Not yet implemented")
+        val old = this.repository.stream().filter{album -> album.id == t.id}.findAny().orElse(null)
+        if(old != null) {
+            this.repository.remove(old)
+            this.repository.add(t)
+            return true
+        }
+        return false
     }
 }

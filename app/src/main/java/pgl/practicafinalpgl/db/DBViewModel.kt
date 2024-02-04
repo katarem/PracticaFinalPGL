@@ -37,7 +37,8 @@ class DBViewModel : ViewModel(){
                     datos?.documentChanges?.forEach { cambio ->
                         when(cambio.type){
                             DocumentChange.Type.ADDED -> {
-                                repository.repository = datos.toObjects(Class.forName(entidad)) as SnapshotStateList<Entity>
+                                val listaFromBD = datos.toObjects(Class.forName(entidad)) as SnapshotStateList<Entity>
+                                repository.repository = listaFromBD.toList() as ArrayList<Entity>
                             }
                             DocumentChange.Type.MODIFIED -> {
                                 val newEntity = cambio.document.toObject<Entity>()
