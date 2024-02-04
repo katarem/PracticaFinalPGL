@@ -1,10 +1,9 @@
 package io.github.katarem.piratify.pantallas
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,9 +57,12 @@ fun PantallaLogin() {
     val context = LocalContext.current
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+
     val errorPass = remember {
         mutableStateOf("")
     }
+    var formulario by remember { mutableStateOf("logIn") }
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -71,20 +73,44 @@ fun PantallaLogin() {
             .background(AppColors.negro)
             .padding(16.dp)
     ) {
-        ContenidoLogin(username = username,
-            onUsernameChange = { username = it },
-            password = password,
-            onPasswordChange = { password = it },
-            errorPass = errorPass.value,
-            onLoginClick = { loginUser(context,username,password){
-                errorPass.value = "Contraseña incorrecta"
-            } },
-            onSinginClick = { registerUser(context,username,password){
-                errorPass.value = "Correo o contraseña inválidos"
-            } },
-            focusManager = focusManager,
-            keyboardController = keyboardController
-        )
+        if (formulario.equals("logIn")) {
+            ContenidoLogin(
+                username = username,
+                onUsernameChange = { username = it },
+                password = password,
+                onPasswordChange = { password = it },
+                errorPass = errorPass.value,
+                onLoginClick = {
+                    loginUser(context, username, password) {
+                        errorPass.value = "Correo o contraseña inválidos"
+                    }
+                },
+                onSinginClick = {
+                    formulario = "signIn"
+                },
+                focusManager = focusManager,
+                keyboardController = keyboardController
+            )
+        } else {
+            ContenidoSingIn(
+                username = username,
+                onUsernameChange = { username = it},
+                password = password,
+                confirmPassword = confirmPassword,
+                onPasswordChange = { password = it},
+                onConfirmPasswordChange = { confirmPassword = it},
+                errorPass = errorPass.value,
+                onSignInClick = { registerUser(context,username,confirmPassword){
+                    errorPass.value = "Correo o contraseña inválidos"
+                } },
+                onLoginClick = {
+                    formulario = "logIn"
+                },
+                focusManager = focusManager,
+                keyboardController = keyboardController
+            )
+
+        }
     }
 }
 
@@ -116,27 +142,29 @@ fun ContenidoLogin(
             username = username, onUsernameChange = onUsernameChange, focusManager = focusManager
         )
 
-        EntradaContraseña(
+        EntradaContrasenya(
             password = password,
             onPasswordChange = onPasswordChange,
             onLoginClick = onLoginClick,
             keyboardController = keyboardController
         )
 
-        Text(text = errorPass,
+        Text(
+            text = errorPass,
             color = Color.Red,
-            fontSize = 16.sp)
+            fontSize = 16.sp
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        BotonIniciarSesion(onLoginClick = onLoginClick)
+        BotonEnviarFormulario(onClick = onLoginClick, "Iniciar sesion")
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
         ) {
-            TextoRegistro(onSigninClick = onSinginClick)
+            TextoRedirigir(onSigninClick = onSinginClick, "No tienes una cuenta?", "Registrame")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -146,6 +174,70 @@ fun ContenidoLogin(
         Spacer(modifier = Modifier.height(8.dp))
 
         RedesSociales()
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun ContenidoSingIn(
+    username: String,
+    onUsernameChange: (String) -> Unit,
+    password: String,
+    confirmPassword: String,
+    onPasswordChange: (String) -> Unit,
+    onConfirmPasswordChange: (String) -> Unit,
+    errorPass: String,
+    onSignInClick: () -> Unit,
+    onLoginClick: () -> Unit,
+    focusManager: FocusManager,
+    keyboardController: SoftwareKeyboardController?
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Logo()
+
+        TextoPiratify()
+
+        EntradaUsuario(
+            username = username, onUsernameChange = onUsernameChange, focusManager = focusManager
+        )
+
+        RegistrarContrasenya(
+            password = password,
+            confirmPassword = confirmPassword,
+            onPasswordChange = onPasswordChange,
+            onConfirmPasswordChange = onConfirmPasswordChange,
+            onSingInClick = onSignInClick,
+            focusManager = focusManager,
+            keyboardController =keyboardController
+        )
+
+        Text(
+            text = errorPass,
+            color = Color.Red,
+            fontSize = 16.sp
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        BotonEnviarFormulario(
+            onClick = onSignInClick,
+            "Registrarse"
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
+        ) {
+            TextoRedirigir(onSigninClick = onLoginClick, "Ya tengo una cuenta, ", "Iniciar sesion")
+        }
+
     }
 }
 
@@ -186,7 +278,8 @@ fun TextoPiratify() {
 fun EntradaUsuario(
     username: String, onUsernameChange: (String) -> Unit, focusManager: FocusManager
 ) {
-    OutlinedTextField(value = username,
+    OutlinedTextField(
+        value = username,
         onValueChange = { onUsernameChange(it) },
         label = { Text(text = "Usuario") },
         modifier = Modifier
@@ -203,13 +296,14 @@ fun EntradaUsuario(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EntradaContraseña(
+fun EntradaContrasenya(
     password: String,
     onPasswordChange: (String) -> Unit,
     onLoginClick: () -> Unit,
     keyboardController: SoftwareKeyboardController?
 ) {
-    OutlinedTextField(value = password,
+    OutlinedTextField(
+        value = password,
         onValueChange = { onPasswordChange(it) },
         label = { Text(text = "Contraseña") },
         modifier = Modifier
@@ -226,10 +320,59 @@ fun EntradaContraseña(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun BotonIniciarSesion(onLoginClick: () -> Unit) {
+fun RegistrarContrasenya(
+    password: String,
+    confirmPassword: String,
+    onPasswordChange: (String) -> Unit,
+    onConfirmPasswordChange: (String) -> Unit,
+    onSingInClick: () -> Unit,
+    focusManager: FocusManager,
+    keyboardController: SoftwareKeyboardController?
+) {
+    OutlinedTextField(
+        value = password,
+        onValueChange = { onPasswordChange(it) },
+        label = { Text(text = "Contraseña") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = ImeAction.Next, keyboardType = KeyboardType.Password
+        ),
+        keyboardActions = KeyboardActions(onNext = {
+            focusManager.moveFocus(FocusDirection.Down)
+        })
+    )
+    OutlinedTextField(
+        value = confirmPassword,
+        onValueChange = { onConfirmPasswordChange(it) },
+        label = { Text(text = "Repetir Contraseña") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = ImeAction.Done, keyboardType = KeyboardType.Password
+        ),
+        keyboardActions = KeyboardActions(onDone = {
+            if (password == confirmPassword) {
+                onSingInClick()
+                keyboardController?.hide()
+            } else {
+//                Toast.makeText(LocalContext.current, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+            }
+        })
+    )
+}
+
+
+@Composable
+fun BotonEnviarFormulario(onClick: () -> Unit, textoBoton: String) {
     Button(
-        onClick = { onLoginClick() },
+        onClick = { onClick() },
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
@@ -237,17 +380,17 @@ fun BotonIniciarSesion(onLoginClick: () -> Unit) {
             containerColor = AppColors.verde
         )
     ) {
-        Text(text = "Iniciar sesión")
+        Text(text = textoBoton)
     }
 }
 
 @Composable
-fun TextoRegistro(onSigninClick: () -> Unit) {
+fun TextoRedirigir(onSigninClick: () -> Unit, textoInformacion : String, textoRedirigir : String) {
     Row {
         Text(
-            text = "No tienes una cuenta? ", color = Color.DarkGray
+            text = textoInformacion, color = Color.DarkGray
         )
-        Text(text = "Registrame",
+        Text(text = textoRedirigir,
             color = AppColors.verde,
             modifier = Modifier.clickable { onSigninClick() })
     }
