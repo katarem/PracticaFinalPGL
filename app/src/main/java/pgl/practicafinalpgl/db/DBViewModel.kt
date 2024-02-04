@@ -37,7 +37,7 @@ class DBViewModel : ViewModel(){
                     datos?.documentChanges?.forEach { cambio ->
                         when(cambio.type){
                             DocumentChange.Type.ADDED -> {
-                                val listaFromBD = datos.toObjects(Class.forName(entidad)) as SnapshotStateList<Entity>
+                                val listaFromBD = datos.toObjects(Class.forName("pgl.practicafinalpgl.model.$entidad")) as SnapshotStateList<Entity>
                                 repository.repository = listaFromBD.toList() as ArrayList<Entity>
                             }
                             DocumentChange.Type.MODIFIED -> {
@@ -66,7 +66,7 @@ class DBViewModel : ViewModel(){
     fun modifySong(song: Song){ _songRepository.value.update(song) }
     fun removeSong(song: Song): Boolean{ return _songRepository.value.remove(song) }
     fun getAllSong(): List<Song> { return _songRepository.value.getAll() }
-    fun getSongById(id: String): Song{ return _songRepository.value.getById(Song(id))}
+    fun getSongById(id: String): Song { return _songRepository.value.getById(Song(id))}
     fun addPlaylist(playlist: Playlist){ _playlistRepository.value.insert(playlist) }
     fun modifyPlaylist(playlist: Playlist){ _playlistRepository.value.update(playlist) }
     fun removePlaylist(playlist: Playlist): Boolean { return _playlistRepository.value.remove(playlist)}
