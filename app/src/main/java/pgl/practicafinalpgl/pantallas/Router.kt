@@ -22,9 +22,12 @@ fun Router() {
     val rutaActual = entradaNavActual?.destination?.route
 
     Surface {
-        NavHost(navController = navController, startDestination = Rutas.PantallaLogin.ruta) {
+        NavHost(navController = navController, startDestination = Rutas.PantallaPlaylists.ruta) {
             composable(Rutas.PantallaLogin.ruta) {
                 PantallaLogin()
+            }
+            composable(Rutas.PantallaPlaylists.ruta) {
+                PantallaPlaylists(navController = navController)
             }
         }
     }
