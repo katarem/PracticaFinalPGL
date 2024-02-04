@@ -2,25 +2,25 @@ package pgl.practicafinalpgl.db
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.toObject
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import pgl.practicafinalpgl.model.Album
-import pgl.practicafinalpgl.model.Entity
 import pgl.practicafinalpgl.model.Playlist
 import pgl.practicafinalpgl.model.Song
-import pgl.practicafinalpgl.model.login.User
 
 class DBViewModel : ViewModel(){
 
     val conexion = FirebaseFirestore.getInstance()
     private lateinit var listenerReg: ListenerRegistration
 
+    // de momento lo vamos a poner así a ver como funciona
+
+    private lateinit var listenerSongs: ListenerRegistration
+    private lateinit var listenerAlbums: ListenerRegistration
     private var _albumRepository = MutableStateFlow(AlbumRepository())
     val albumRepository = _albumRepository.asStateFlow()
 
@@ -30,22 +30,22 @@ class DBViewModel : ViewModel(){
     private var _playlistRepository = MutableStateFlow(PlaylistRepository())
     val playlistRepository = _playlistRepository.asStateFlow()
 
-    fun crearListener(entidad: String, repository: Repository<Entity>){
-        listenerReg = conexion.collection(entidad).addSnapshotListener{
+    fun crearListenerSongs(entidad: String, repository: Repository<Song>){
+        listenerSongs = conexion.collection(entidad).addSnapshotListener{
             datos,error ->
                 if(error==null){
                     datos?.documentChanges?.forEach { cambio ->
                         when(cambio.type){
                             DocumentChange.Type.ADDED -> {
-                                val listaFromBD = datos.toObjects(Class.forName("pgl.practicafinalpgl.model.$entidad")) as SnapshotStateList<Entity>
-                                repository.repository = listaFromBD.toList() as ArrayList<Entity>
+                                val listaFromBD = datos.toObjects(Class.forName("pgl.practicafinalpgl.model.$entidad")) as SnapshotStateList<Song>
+                                repository.repository = listaFromBD.toList() as ArrayList<Song>
                             }
                             DocumentChange.Type.MODIFIED -> {
-                                val newEntity = cambio.document.toObject<Entity>()
+                                val newEntity = cambio.document.toObject<Song>()
                                 repository.update(newEntity)
                             }
                             DocumentChange.Type.REMOVED -> {
-                                val newEntity = cambio.document.toObject<Entity>()
+                                val newEntity = cambio.document.toObject<Song>()
                                 repository.remove(newEntity)
                             }
                         }
@@ -54,6 +54,35 @@ class DBViewModel : ViewModel(){
         }
 
     }
+
+    fun crearListenerAlbums(entidad: String, repository: Repository<Album>){
+        listenerAlbums = conexion.collection(entidad).addSnapshotListener{
+                datos,error ->
+            if(error==null){
+                datos?.documentChanges?.forEach { cambio ->
+                    when(cambio.type){
+                        DocumentChange.Type.ADDED -> {
+                            val listaFromBD = datos.toObjects(Class.forName("pgl.practicafinalpgl.model.$entidad")) as SnapshotStateList<Album>
+                            repository.repository = listaFromBD.toList() as ArrayList<Album>
+                        }
+                        DocumentChange.Type.MODIFIED -> {
+                            val newEntity = cambio.document.toObject<Album>()
+                            repository.update(newEntity)
+                        }
+                        DocumentChange.Type.REMOVED -> {
+                            val newEntity = cambio.document.toObject<Album>()
+                            repository.remove(newEntity)
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    fun removeListenerAlbums(){ listenerAlbums.remove() }
+
+    fun removeListenerSongs(){ listenerSongs.remove() }
 
     fun removeListener(){ listenerReg.remove() }
 

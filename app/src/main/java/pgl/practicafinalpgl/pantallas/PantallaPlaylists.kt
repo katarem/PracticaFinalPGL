@@ -34,7 +34,6 @@ import pgl.practicafinalpgl.Rutas.Rutas
 import pgl.practicafinalpgl.db.DBViewModel
 import pgl.practicafinalpgl.db.Repository
 import pgl.practicafinalpgl.model.Album
-import pgl.practicafinalpgl.model.Entity
 import pgl.practicafinalpgl.utils.AppColors
 
 @Composable
@@ -45,7 +44,7 @@ fun PantallaPlaylists(navController: NavController?) {
 
     DisposableEffect(Unit) {
         val albumRepository = dbViewModel.albumRepository.value
-        dbViewModel.crearListener("Album", albumRepository as Repository<Entity>)
+        dbViewModel.crearListenerAlbums("Album", albumRepository)
 
         onDispose {
             dbViewModel.removeListener()

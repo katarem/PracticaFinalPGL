@@ -7,7 +7,7 @@ class Album(
     val releaseDate: String?,
     val artistId: String?,
     val portait: String?
-) : Entity() {
+){
 
     constructor() : this(null, null, null, null, null, null)
 

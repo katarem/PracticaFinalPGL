@@ -1,11 +1,11 @@
 package pgl.practicafinalpgl.model
 
 class Song(
-    val id: String?,
-    val name: String?,
-    val artistId: String?,
-    val albumId: String?
-) : Entity() {
+    id: String?,
+    name: String?,
+    artistId: String?,
+    albumId: String?
+){
 
     constructor() : this(null, null, null, null)
 

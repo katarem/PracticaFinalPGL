@@ -10,6 +10,6 @@ open class UserType(
     following: Int?,
     followers: Int?,
     permissions: Permissions?
-): Entity(){
+){
     constructor(id: String): this(id,null,null,null,null,null,null)
 }

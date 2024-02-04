@@ -1,5 +1,12 @@
 package pgl.practicafinalpgl.model
 
-data class Playlist(val id: String, val name: String?, val songs: List<Song>?,val suscribedUsersIds: List<String>?, val authorId: String?, val creationDate: String?, val portait: String?): Entity(){
+class Playlist(
+    id: String,
+    name: String?,
+    songs: List<Song>?,
+    suscribedUsersIds: List<String>?,
+    authorId: String?,
+    creationDate: String?,
+    portait: String?){
     constructor(id: String): this(id,null,null,null,null,null,null)
 }
