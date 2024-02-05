@@ -2,8 +2,13 @@ package pgl.practicafinalpgl.model.login
 
 import java.util.ArrayList
 
-class Admin : UserType {
 
+
+
+class Admin : UserType {
+    override var permissions: Permissions = Permissions.ADMIN
+
+    constructor(): super()
     constructor(id: String): super(id,Permissions.ADMIN)
     constructor(
         nickname: String,

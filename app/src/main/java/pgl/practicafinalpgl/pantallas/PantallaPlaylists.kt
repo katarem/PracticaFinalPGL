@@ -1,5 +1,6 @@
 package pgl.practicafinalpgl.pantallas
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,9 +44,7 @@ fun PantallaPlaylists(navController: NavController?) {
     val albums by dbViewModel.albumRepository.collectAsState()
 
     DisposableEffect(Unit) {
-        val albumRepository = dbViewModel.albumRepository.value
-        dbViewModel.crearListenerAlbums("Album", albumRepository)
-
+        dbViewModel.crearListenerAlbums("Album", dbViewModel.albumRepository.value)
         onDispose {
             dbViewModel.removeListener()
         }
