@@ -1,14 +1,13 @@
 package pgl.practicafinalpgl.model.login
 
-import pgl.practicafinalpgl.model.UserType
+class User: UserType{
+    constructor(id: String): super(id, Permissions.USER)
 
-data class User(
-    var id: String,
-    var nickname: String?,
-    var profilePhoto: String?,
-    var ownedPlaylists: List<String>?,
-    var following: Int?,
-    var followers: Int?
-): UserType(id, nickname, profilePhoto, ownedPlaylists, following, followers, permissions = Permissions.USER) {
-    constructor(id: String): this(id,null,null,null,null,null)
+    constructor(
+        nickname: String,
+        profilePhoto: String,
+        ownedPlaylists: ArrayList<String>,
+        following: Int,
+        followers: Int
+    ): super(nickname, profilePhoto, ownedPlaylists, following, followers, Permissions.USER)
 }

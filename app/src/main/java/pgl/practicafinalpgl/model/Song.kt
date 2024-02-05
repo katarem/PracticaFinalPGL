@@ -1,13 +1,29 @@
 package pgl.practicafinalpgl.model
 
-class Song(
-    id: String?,
-    name: String?,
-    artistId: String?,
-    albumId: String?
-){
+class Song{
+    var id: String?
+    var name: String?
+    var artistId: String?
+    var albumId: String?
+    constructor(
+        id: String?
+    ){
+        this.id = id
+        this.name = null
+        this.artistId = null
+        this.albumId = null
+    }
 
-    constructor() : this(null, null, null, null)
+    constructor(
+        name: String,
+        artistId: String,
+        albumId: String
+    ){
+        this.id = null
+        this.name = name
+        this.artistId = artistId
+        this.albumId = albumId
+    }
 
-    constructor(id: String) : this(id, null, null, null)
+
 }
