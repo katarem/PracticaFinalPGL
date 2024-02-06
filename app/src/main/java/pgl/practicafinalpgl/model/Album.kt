@@ -6,7 +6,7 @@ import java.util.ArrayList
 class Album(){
     var id: String? = ""
     var name: String = ""
-    var songs: ArrayList<DocumentReference> = ArrayList()
+    var songs: ArrayList<Song> = ArrayList()
     var releaseDate: String = ""
     var artistId: String = ""
     var portait: String = ""

@@ -4,8 +4,13 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
@@ -26,11 +31,27 @@ class Testing : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PracticaFinalPGLTheme {
-                PantallaPrueba()
+                PantallaPrueba2()
             }
         }
     }
 }
+@Composable
+fun PantallaPrueba2(){
+
+    val db: DBViewModel = viewModel()
+    val canciones = db.songRepository.collectAsState()
+    Text(text = "ITEMS")
+    LazyColumn(content = {
+        items(canciones.value.getAll()){
+            Text(text = it.albumId)
+            Text(text = it.artistId)
+            Text(text = it.id + "")
+            Text(text = it.name)
+        }
+    })
+}
+
 
 
 @Composable

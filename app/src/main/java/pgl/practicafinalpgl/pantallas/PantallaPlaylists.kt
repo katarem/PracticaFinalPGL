@@ -41,14 +41,20 @@ import pgl.practicafinalpgl.utils.AppColors
 fun PantallaPlaylists(navController: NavController?) {
 
     val dbViewModel: DBViewModel = viewModel()
-    val albums by dbViewModel.albumRepository.collectAsState()
+    val albums = dbViewModel.albumRepository.collectAsState()
 
     DisposableEffect(Unit) {
-        dbViewModel.crearListenerAlbums("Album", dbViewModel.albumRepository.value)
+        dbViewModel.crearListenerSongs()
+        dbViewModel.crearListenerAlbums()
         onDispose {
             dbViewModel.removeListener()
         }
     }
+
+    Log.d("CRIS_DEBUG","A PARTIR DE AQUÍ VEMOS LOS ÁLBUMES")
+    Log.d("CRIS_DEBUG",albums.value.repository.size.toString())
+
+
 
     Box(modifier = Modifier.background(AppColors.negro)) {
         Column(
@@ -63,7 +69,7 @@ fun PantallaPlaylists(navController: NavController?) {
             )
             LazyRow(
                 content = {
-                    items(albums.getAll()) {
+                    items(albums.value.getAll()) {
                         AlbumItem(
                             album = it,
                             { navController?.navigate(Rutas.PantallaAlbum.ruta + "/${it.name}") })
@@ -90,21 +96,17 @@ fun AlbumItem(album: Album, onClick: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.background(AppColors.verde)
         ) {
-            album.portait?.let {
-                Image(
-                    painter = painterResource(id = R.drawable.maw),
-                    contentDescription = album.name,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            album.name?.let {
-                Text(
-                    text = it,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            Image(
+                painter = painterResource(id = R.drawable.maw),
+                contentDescription = album.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = album.name,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
