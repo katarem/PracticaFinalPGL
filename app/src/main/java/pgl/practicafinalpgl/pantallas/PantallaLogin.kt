@@ -1,6 +1,5 @@
 package io.github.katarem.piratify.pantallas
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,6 +43,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pgl.practicafinalpgl.R
@@ -263,10 +263,10 @@ fun Logo() {
 }
 
 @Composable
-fun TextoPiratify() {
+fun TextoPiratify(size: TextUnit = 42.sp) {
     Text(
         text = "Piratify",
-        fontSize = 42.sp,
+        fontSize = size,
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Bold,
         color = Color.White,

@@ -31,14 +31,15 @@ class Testing : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PracticaFinalPGLTheme {
-                PantallaPrueba2()
+
+                PantallaPrueba2(viewModel())//esto no funciona pero hace falta para que no se queje
             }
         }
     }
 }
 @Composable
-fun PantallaPrueba2(){
-
+fun PantallaPrueba2(model: DBViewModel){
+    model.crearListenerAlbums()
     val db: DBViewModel = viewModel()
     val canciones = db.songRepository.collectAsState()
     Text(text = "ITEMS")

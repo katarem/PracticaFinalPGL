@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.katarem.piratify.pantallas.PantallaLogin
+import io.github.katarem.piratify.pantallas.PantallaUser
 import pgl.practicafinalpgl.Rutas.Rutas
 import pgl.practicafinalpgl.db.DBViewModel
 import pgl.practicafinalpgl.utils.loginUser
@@ -22,9 +23,9 @@ fun Router() {
     val entradaNavActual by navController.currentBackStackEntryAsState()
     val dbViewModel: DBViewModel = viewModel()
     val rutaActual = entradaNavActual?.destination?.route
-    dbViewModel.initialize()
+//    dbViewModel.Initialize()
     Surface {
-        NavHost(navController = navController, startDestination = Rutas.PantallaTesting.ruta) {
+        NavHost(navController = navController, startDestination = Rutas.PantallaUser.ruta) {
             composable(Rutas.PantallaLogin.ruta) {
                 PantallaLogin()
             }
@@ -32,8 +33,12 @@ fun Router() {
                 PantallaPlaylists(navController = navController)
             }
             composable(Rutas.PantallaTesting.ruta){
-                PantallaPrueba2()
+                PantallaPrueba2(model = dbViewModel)
             }
+            composable(Rutas.PantallaUser.ruta){
+                PantallaUser()
+            }
+
         }
     }
 }

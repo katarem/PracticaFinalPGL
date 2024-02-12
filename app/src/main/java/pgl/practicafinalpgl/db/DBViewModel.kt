@@ -61,15 +61,15 @@ class DBViewModel : ViewModel(){
         }
 
     }
-    @Composable
-    fun initialize(){
-        DisposableEffect(Unit) {
-            crearListenerSongs()
-                onDispose {
-                    removeListenerSongs()
-                }
-        }
-    }
+//    @Composable
+//    fun Initialize(){
+//        DisposableEffect(Unit) {
+//            crearListenerSongs()
+//                onDispose {
+//                    removeListenerSongs()
+//                }
+//        }
+//    }
 
 
     fun crearListenerAlbums(){
@@ -79,11 +79,11 @@ class DBViewModel : ViewModel(){
                 snapshot?.documentChanges?.forEach { cambios ->
                     when(cambios.type){
                         DocumentChange.Type.ADDED -> {
-                            var obtained = cambios.document.toObject<Album>()
+                            var obtained = cambios.document//Could not deserialize object. Can't convert object of type com.google.firebase.firestore.DocumentReference to type pgl.practicafinalpgl.model.Song (found in field 'songs.[0]'
                             var songRefs = cambios.document["songs"] as ArrayList<DocumentReference>
                             var canciones = songRefs.map { it.get() }.toList() as ArrayList<Song>
-                            obtained.songs = canciones
-                            _albumRepository.value.insert(obtained)
+//                            obtained.songs = canciones
+//                            _albumRepository.value.insert(obtained)
                         }
                         DocumentChange.Type.MODIFIED -> {
                             val newEntity = cambios.document.toObject<Album>()

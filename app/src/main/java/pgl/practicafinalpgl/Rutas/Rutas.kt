@@ -7,5 +7,6 @@ sealed class Rutas(var ruta: String) {
     object PantallaAlbum: Rutas(ruta = "pantallaalbum")
     object PantallaAllCanciones: Rutas(ruta = "pantallaallcanciones")
 
+    object PantallaUser: Rutas(ruta = "pantallauser")
     object PantallaTesting: Rutas(ruta = "testing")
 }

@@ -25,3 +25,5 @@ replay_pid*
 local.properties
 .gradle/config.properties
 local.properties
+local.properties
+*.properties
