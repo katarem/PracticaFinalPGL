@@ -1,6 +1,8 @@
 package pgl.practicafinalpgl.db
 
 import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
@@ -12,6 +14,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import pgl.practicafinalpgl.model.Album
 import pgl.practicafinalpgl.model.Playlist
@@ -35,6 +40,7 @@ class DBViewModel : ViewModel() {
     private var _playlistRepository = MutableStateFlow(PlaylistRepository())
     val playlistRepository = _playlistRepository.asStateFlow()
 
+
     fun crearListenerSongs() {
         listenerSongs = conexion.collection("song").addSnapshotListener { datos, error ->
             if (error == null) {
@@ -42,9 +48,9 @@ class DBViewModel : ViewModel() {
                     when (cambios.type) {
                         DocumentChange.Type.ADDED -> {
                             GlobalScope.launch {
-                                val album = Album.toObject(cambios.document)
-                                _albumRepository.value.update(album)
-                                Log.d("CHRIS_DEBUG", "Albums: ${_albumRepository.value.getAll()}")
+                                val song = Song.toObject(cambios.document)
+                                _songRepository.value.update(song)
+                                Log.d("CHRIS_DEBUG", "Songs: ${_songRepository.value.getAll()}")
                             }
                         }
 
@@ -61,17 +67,18 @@ class DBViewModel : ViewModel() {
                 }
             }
         }
-
     }
-//    @Composable
-//    fun Initialize(){
-//        DisposableEffect(Unit) {
-//            crearListenerSongs()
-//                onDispose {
-//                    removeListenerSongs()
-//                }
-//        }
-//    }
+    @Composable
+    fun Initialize(){
+        DisposableEffect(Unit) {
+            crearListenerSongs()
+            crearListenerAlbums()
+            onDispose {
+                removeListenerSongs()
+                removeListenerAlbums()
+            }
+        }
+    }
 
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -83,19 +90,25 @@ class DBViewModel : ViewModel() {
                         DocumentChange.Type.ADDED -> {
                             GlobalScope.launch {
                                 val obtained = Album.toObject(cambios.document)
-                                _albumRepository?.value?.insert(obtained)
+                                val currentRepo = _albumRepository.value
+                                currentRepo.insert(obtained)
+                                _albumRepository.value = currentRepo
                                 Log.d("CHRIS_DEBUG", "Albums: ${_albumRepository?.value?.getAll()}")
                             }
                         }
 
                         DocumentChange.Type.MODIFIED -> {
                             val newEntity = cambios.document.toObject<Album>()
-                            _albumRepository?.value?.update(newEntity)
+                            val currentRepo = _albumRepository.value
+                            currentRepo.update(newEntity)
+                            _albumRepository.value = currentRepo
                         }
 
                         DocumentChange.Type.REMOVED -> {
                             val newEntity = cambios.document.toObject<Album>()
-                            _albumRepository?.value?.remove(newEntity)
+                            val currentRepo = _albumRepository.value
+                            currentRepo.remove(newEntity)
+                            _albumRepository.value = currentRepo
                         }
 
                         else -> {

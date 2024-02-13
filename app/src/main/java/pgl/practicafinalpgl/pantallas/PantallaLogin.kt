@@ -100,9 +100,15 @@ fun PantallaLogin() {
                 onPasswordChange = { password = it},
                 onConfirmPasswordChange = { confirmPassword = it},
                 errorPass = errorPass.value,
-                onSignInClick = { registerUser(context,username,confirmPassword){
-                    errorPass.value = "Correo o contraseña inválidos"
-                } },
+                onSignInClick = {
+                    if (password == confirmPassword) {
+                        registerUser(context, username, confirmPassword) {
+                            errorPass.value = "Correo o contraseña inválidos"
+                        }
+                    } else {
+                        errorPass.value = "Las contraseñas no coinciden"
+                    }
+                },
                 onLoginClick = {
                     formulario = "logIn"
                 },
