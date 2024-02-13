@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
@@ -41,14 +42,14 @@ class Testing : ComponentActivity() {
 fun PantallaPrueba2(model: DBViewModel){
     model.crearListenerAlbums()
     val db: DBViewModel = viewModel()
-    val canciones = db.songRepository.collectAsState()
-    Text(text = "ITEMS")
+    val canciones = db.albumRepository.collectAsState()
+    Text(text = "ITEMS", color = Color.Black)
     LazyColumn(content = {
         items(canciones.value.getAll()){
-            Text(text = it.albumId)
-            Text(text = it.artistId)
-            Text(text = it.id + "")
-            Text(text = it.name)
+            Text(text = it.id!!, color = Color.Black)
+            Text(text = it.artistId, color = Color.Black)
+            Text(text = it.id + "", color = Color.Black)
+            Text(text = it.name, color = Color.Black)
         }
     })
 }

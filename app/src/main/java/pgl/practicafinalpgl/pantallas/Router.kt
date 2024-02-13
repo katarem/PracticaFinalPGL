@@ -25,7 +25,7 @@ fun Router() {
     val rutaActual = entradaNavActual?.destination?.route
 //    dbViewModel.Initialize()
     Surface {
-        NavHost(navController = navController, startDestination = Rutas.PantallaUser.ruta) {
+        NavHost(navController = navController, startDestination = Rutas.PantallaPlaylists.ruta) {
             composable(Rutas.PantallaLogin.ruta) {
                 PantallaLogin()
             }
