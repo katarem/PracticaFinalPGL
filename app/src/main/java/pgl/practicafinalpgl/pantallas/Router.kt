@@ -16,19 +16,19 @@ import pgl.practicafinalpgl.db.DBViewModel
 fun Router() {
     val navController = rememberNavController()
     val entradaNavActual by navController.currentBackStackEntryAsState()
-    val dbViewModel: DBViewModel = viewModel()
+    //val dbViewModel: DBViewModel = viewModel()
     val rutaActual = entradaNavActual?.destination?.route
-    dbViewModel.Initialize()
+    //dbViewModel.Initialize()
     Surface {
         NavHost(navController = navController, startDestination = Rutas.PantallaPlaylists.ruta) {
             composable(Rutas.PantallaLogin.ruta) {
                 PantallaLogin()
             }
             composable(Rutas.PantallaPlaylists.ruta) {
-                PantallaPlaylists(navController = navController, albumRepository = dbViewModel.albumRepository)
+                PantallaPlaylists(navController = navController, albumRepository = null)
             }
             composable(Rutas.PantallaTesting.ruta){
-                PantallaPrueba2(model = dbViewModel)
+                PantallaPrueba2(model = null)
             }
             composable(Rutas.PantallaUser.ruta){
                 PantallaUser()

@@ -39,13 +39,13 @@ class Testing : ComponentActivity() {
     }
 }
 @Composable
-fun PantallaPrueba2(model: DBViewModel){
-    model.crearListenerAlbums()
+fun PantallaPrueba2(model: DBViewModel?){
+    model!!.crearListenerAlbums()
     val db: DBViewModel = viewModel()
-    val canciones = db.albumRepository.collectAsState()
+    val canciones = db.listaAlbums.collectAsState()
     Text(text = "ITEMS", color = Color.Black)
     LazyColumn(content = {
-        items(canciones.value.getAll()){
+        items(canciones.value){
             Text(text = it.id!!, color = Color.Black)
             Text(text = it.artistId, color = Color.Black)
             Text(text = it.id + "", color = Color.Black)

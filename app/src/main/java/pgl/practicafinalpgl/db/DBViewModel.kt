@@ -3,13 +3,16 @@ package pgl.practicafinalpgl.db
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,11 +34,12 @@ class DBViewModel : ViewModel() {
 
     private lateinit var listenerSongs: ListenerRegistration
     private lateinit var listenerAlbums: ListenerRegistration
-    private var _albumRepository = MutableStateFlow(AlbumRepository())
-    val albumRepository = _albumRepository.asStateFlow()
 
-    private var _songRepository = MutableStateFlow(SongRepository())
-    val songRepository = _songRepository.asStateFlow()
+    private var _listaAlbums = MutableStateFlow(mutableStateListOf<Album>())
+    val listaAlbums = _listaAlbums.asStateFlow()
+
+    private var _listaCanciones = MutableStateFlow(mutableStateListOf<Song>())
+    val listaCanciones = _listaCanciones.asStateFlow()
 
     private var _playlistRepository = MutableStateFlow(PlaylistRepository())
     val playlistRepository = _playlistRepository.asStateFlow()
@@ -47,21 +51,22 @@ class DBViewModel : ViewModel() {
                 datos?.documentChanges?.forEach { cambios ->
                     when (cambios.type) {
                         DocumentChange.Type.ADDED -> {
-                            GlobalScope.launch {
+                            viewModelScope.launch(Dispatchers.IO) {
                                 val song = Song.toObject(cambios.document)
-                                _songRepository.value.update(song)
-                                Log.d("CHRIS_DEBUG", "Songs: ${_songRepository.value.getAll()}")
+                                _listaCanciones.value.add(song)
                             }
                         }
 
                         DocumentChange.Type.MODIFIED -> {
                             val newEntity = cambios.document.toObject<Song>()
-                            _songRepository.value.update(newEntity)
+                            val oldSong = _listaCanciones.value.filter { s -> s.id == newEntity.id }.first()
+                            _listaCanciones.value.remove(oldSong)
+                            _listaCanciones.value.add(newEntity)
                         }
 
                         DocumentChange.Type.REMOVED -> {
                             val newEntity = cambios.document.toObject<Song>()
-                            _songRepository.value.remove(newEntity)
+                            _listaCanciones.value.remove(newEntity)
                         }
                     }
                 }
@@ -88,27 +93,22 @@ class DBViewModel : ViewModel() {
                 snapshot?.documentChanges?.forEach { cambios ->
                     when (cambios.type) {
                         DocumentChange.Type.ADDED -> {
-                            GlobalScope.launch {
+                            viewModelScope.launch(Dispatchers.IO) {
                                 val obtained = Album.toObject(cambios.document)
-                                val currentRepo = _albumRepository.value
-                                currentRepo.insert(obtained)
-                                _albumRepository.value = currentRepo
-                                Log.d("CHRIS_DEBUG", "Albums: ${_albumRepository?.value?.getAll()}")
+                                _listaAlbums.value.add(obtained)
                             }
                         }
 
                         DocumentChange.Type.MODIFIED -> {
                             val newEntity = cambios.document.toObject<Album>()
-                            val currentRepo = _albumRepository.value
-                            currentRepo.update(newEntity)
-                            _albumRepository.value = currentRepo
+                            val oldAlbum = _listaAlbums.value.filter{ a -> a.id == newEntity.id }.first()
+                            _listaAlbums.value.remove(oldAlbum)
+                            _listaAlbums.value.add(newEntity)
                         }
 
                         DocumentChange.Type.REMOVED -> {
                             val newEntity = cambios.document.toObject<Album>()
-                            val currentRepo = _albumRepository.value
-                            currentRepo.remove(newEntity)
-                            _albumRepository.value = currentRepo
+                            _listaAlbums.value.remove(newEntity)
                         }
 
                         else -> {
@@ -131,46 +131,6 @@ class DBViewModel : ViewModel() {
 
     fun removeListener() {
         listenerReg.remove()
-    }
-
-    fun addAlbum(album: Album) {
-        _albumRepository.value.insert(album)
-    }
-
-    fun modifyAlbum(album: Album) {
-        _albumRepository.value.update(album)
-    }
-
-    fun removeAlbum(album: Album): Boolean {
-        return _albumRepository.value.remove(album)
-    }
-
-    fun getAllAlbum(): List<Album> {
-        return _albumRepository.value.getAll()
-    }
-
-    fun getAlbumById(id: String): Album {
-        return _albumRepository.value.getById(Album(id))
-    }
-
-    fun addSong(song: Song) {
-        _songRepository.value.insert(song)
-    }
-
-    fun modifySong(song: Song) {
-        _songRepository.value.update(song)
-    }
-
-    fun removeSong(song: Song): Boolean {
-        return _songRepository.value.remove(song)
-    }
-
-    fun getAllSong(): List<Song> {
-        return _songRepository.value.getAll()
-    }
-
-    fun getSongById(id: String): Song {
-        return _songRepository.value.getById(Song(id))
     }
 
     fun addPlaylist(playlist: Playlist) {

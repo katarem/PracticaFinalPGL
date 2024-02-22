@@ -25,23 +25,24 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.flow.StateFlow
 import pgl.practicafinalpgl.R
 import pgl.practicafinalpgl.db.AlbumRepository
+import pgl.practicafinalpgl.db.DBViewModel
 import pgl.practicafinalpgl.model.Album
 import pgl.practicafinalpgl.utils.AppColors
 
 @Composable
 fun PantallaPlaylists(
-    navController: NavController?, albumRepository: StateFlow<AlbumRepository>
+    navController: NavController?, albumRepository: StateFlow<AlbumRepository>?
 ) {
-
-    val albums = albumRepository.collectAsState().value
-
+    val viewModel: DBViewModel = viewModel()
+    val albums = viewModel.listaAlbums.collectAsState()
+    viewModel.Initialize()
     Box(modifier = Modifier.background(AppColors.negro)) {
         Column(
             modifier = Modifier
@@ -55,7 +56,7 @@ fun PantallaPlaylists(
             )
             LazyRow(
                 content = {
-                    items(albums.getAll()) { album ->
+                    items(albums.value) { album ->
                         Log.d("CHRIS_DEBUG", "Album: $album")
                         AlbumItem(
                             album = album
