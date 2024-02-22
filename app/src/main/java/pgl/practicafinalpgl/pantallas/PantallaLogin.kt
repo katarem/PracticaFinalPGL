@@ -21,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +47,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import pgl.practicafinalpgl.R
+import pgl.practicafinalpgl.pantallas.LoginViewModel
 import pgl.practicafinalpgl.utils.AppColors
 import pgl.practicafinalpgl.utils.loginUser
 import pgl.practicafinalpgl.utils.registerUser
@@ -55,17 +58,10 @@ import pgl.practicafinalpgl.utils.registerUser
 @Composable
 fun PantallaLogin() {
     val context = LocalContext.current
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-
-    val errorPass = remember {
-        mutableStateOf("")
-    }
-    var formulario by remember { mutableStateOf("logIn") }
-
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val loginViewModel = LoginViewModel(context, focusManager, keyboardController)
+    val isLogin = loginViewModel.isLogin.collectAsState()
 
     Box(
         modifier = Modifier
@@ -73,66 +69,19 @@ fun PantallaLogin() {
             .background(AppColors.negro)
             .padding(16.dp)
     ) {
-        if (formulario.equals("logIn")) {
-            ContenidoLogin(
-                username = username,
-                onUsernameChange = { username = it },
-                password = password,
-                onPasswordChange = { password = it },
-                errorPass = errorPass.value,
-                onLoginClick = {
-                    loginUser(context, username, password) {
-                        errorPass.value = "Correo o contraseña inválidos"
-                    }
-                },
-                onSinginClick = {
-                    formulario = "signIn"
-                },
-                focusManager = focusManager,
-                keyboardController = keyboardController
-            )
-        } else {
-            ContenidoSingIn(
-                username = username,
-                onUsernameChange = { username = it},
-                password = password,
-                confirmPassword = confirmPassword,
-                onPasswordChange = { password = it},
-                onConfirmPasswordChange = { confirmPassword = it},
-                errorPass = errorPass.value,
-                onSignInClick = {
-                    if (password == confirmPassword) {
-                        registerUser(context, username, confirmPassword) {
-                            errorPass.value = "Correo o contraseña inválidos"
-                        }
-                    } else {
-                        errorPass.value = "Las contraseñas no coinciden"
-                    }
-                },
-                onLoginClick = {
-                    formulario = "logIn"
-                },
-                focusManager = focusManager,
-                keyboardController = keyboardController
-            )
-
-        }
+        if (isLogin.value)
+            ContenidoLogin(model = loginViewModel)
+        else
+            ContenidoSingIn(model = loginViewModel)
     }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ContenidoLogin(
-    username: String,
-    onUsernameChange: (String) -> Unit,
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    errorPass: String,
-    onLoginClick: () -> Unit,
-    onSinginClick: () -> Unit,
-    focusManager: FocusManager,
-    keyboardController: SoftwareKeyboardController?
-) {
+fun ContenidoLogin(model: LoginViewModel) {
+
+    val errorText = model.errorText.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -141,44 +90,25 @@ fun ContenidoLogin(
         verticalArrangement = Arrangement.Center
     ) {
         Logo()
-
         TextoPiratify()
-
-        EntradaUsuario(
-            username = username, onUsernameChange = onUsernameChange, focusManager = focusManager
-        )
-
-        EntradaContrasenya(
-            password = password,
-            onPasswordChange = onPasswordChange,
-            onLoginClick = onLoginClick,
-            keyboardController = keyboardController
-        )
-
+        EntradaUsuario(viewModel = model)
+        EntradaContrasenya(model = model)
         Text(
-            text = errorPass,
+            text = errorText.value,
             color = Color.Red,
             fontSize = 16.sp
         )
-
         Spacer(modifier = Modifier.height(16.dp))
-
-        BotonEnviarFormulario(onClick = onLoginClick, "Iniciar sesion")
-
+        BotonEnviarFormulario(onClick = { model.changeLoginState(true) }, "Iniciar sesion")
         Spacer(modifier = Modifier.height(8.dp))
-
         Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
         ) {
-            TextoRedirigir(onSigninClick = onSinginClick, "No tienes una cuenta?", "Registrame")
+            TextoRedirigir("No tienes una cuenta?", "Registrame")
         }
-
         Spacer(modifier = Modifier.height(8.dp))
-
-        TextoContinuarCon()
-
+        Text(text = "Continúa también con", color = Color.DarkGray)
         Spacer(modifier = Modifier.height(8.dp))
-
         RedesSociales()
     }
 }
@@ -186,18 +116,10 @@ fun ContenidoLogin(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ContenidoSingIn(
-    username: String,
-    onUsernameChange: (String) -> Unit,
-    password: String,
-    confirmPassword: String,
-    onPasswordChange: (String) -> Unit,
-    onConfirmPasswordChange: (String) -> Unit,
-    errorPass: String,
-    onSignInClick: () -> Unit,
-    onLoginClick: () -> Unit,
-    focusManager: FocusManager,
-    keyboardController: SoftwareKeyboardController?
+    model: LoginViewModel
 ) {
+    val errorText = model.errorText.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -206,49 +128,32 @@ fun ContenidoSingIn(
         verticalArrangement = Arrangement.Center
     ) {
         Logo()
-
         TextoPiratify()
-
-        EntradaUsuario(
-            username = username, onUsernameChange = onUsernameChange, focusManager = focusManager
-        )
-
-        RegistrarContrasenya(
-            password = password,
-            confirmPassword = confirmPassword,
-            onPasswordChange = onPasswordChange,
-            onConfirmPasswordChange = onConfirmPasswordChange,
-            onSingInClick = onSignInClick,
-            focusManager = focusManager,
-            keyboardController =keyboardController
-        )
-
+        EntradaUsuario(viewModel = model)
+        RegistrarContrasenya(model = model)
         Text(
-            text = errorPass,
+            text = errorText.value,
             color = Color.Red,
             fontSize = 16.sp
         )
-
         Spacer(modifier = Modifier.height(16.dp))
-
         BotonEnviarFormulario(
-            onClick = onSignInClick,
+            onClick = {
+                if(!model.isContrasenyaConfirmed()) model.setErrorText("Las contraseñas no son iguales")
+                else registerUser(model.contexto.value,model.getUserName(),model.getPassword(), onError = { model.setErrorText("Hubo error con el registro") }) },
             "Registrarse"
         )
-
         Spacer(modifier = Modifier.height(8.dp))
-
         Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
         ) {
-            TextoRedirigir(onSigninClick = onLoginClick, "Ya tengo una cuenta, ", "Iniciar sesion")
+            TextoRedirigir("Ya tengo una cuenta, ", "Iniciar sesion")
         }
 
     }
 }
 
 @Preview(showBackground = true)
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PantallaLoginPreview() {
     PantallaLogin()
@@ -264,7 +169,7 @@ fun Logo() {
         modifier = Modifier
             .size(200.dp)
             .padding(16.dp)
-            .clickable { loginUser(context, "testing@testing.es", "testing", {}) }
+            .clickable { loginUser(context, "testing@testing.es", "testing", onError = {}) }
     )
 }
 
@@ -281,12 +186,14 @@ fun TextoPiratify(size: TextUnit = 42.sp) {
 }
 
 @Composable
-fun EntradaUsuario(
-    username: String, onUsernameChange: (String) -> Unit, focusManager: FocusManager
-) {
+fun EntradaUsuario(viewModel: LoginViewModel) {
+
+    val username = viewModel.username.collectAsState()
+    val focusManager = viewModel.focusManager.collectAsState()
+
     OutlinedTextField(
-        value = username,
-        onValueChange = { onUsernameChange(it) },
+        value = username.value,
+        onValueChange = { viewModel.setUserName(it) },
         label = { Text(text = "Usuario") },
         modifier = Modifier
             .fillMaxWidth()
@@ -295,22 +202,22 @@ fun EntradaUsuario(
             imeAction = ImeAction.Next
         ),
         keyboardActions = KeyboardActions(onNext = {
-            focusManager.moveFocus(FocusDirection.Down)
+            focusManager.value.moveFocus(FocusDirection.Down)
         })
     )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EntradaContrasenya(
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    onLoginClick: () -> Unit,
-    keyboardController: SoftwareKeyboardController?
-) {
+fun EntradaContrasenya(model: LoginViewModel) {
+
+    val password = model.password.collectAsState()
+    val keyboardController = model.keyboardController.collectAsState()
+    val context = model.contexto.collectAsState()
+
     OutlinedTextField(
-        value = password,
-        onValueChange = { onPasswordChange(it) },
+        value = password.value,
+        onValueChange = { model.setPassword(it) },
         label = { Text(text = "Contraseña") },
         modifier = Modifier
             .fillMaxWidth()
@@ -320,26 +227,27 @@ fun EntradaContrasenya(
             imeAction = ImeAction.Done, keyboardType = KeyboardType.Password
         ),
         keyboardActions = KeyboardActions(onDone = {
-            onLoginClick()
-            keyboardController?.hide()
+            loginUser(context.value, model.getUserName(), model.getPassword()) {
+                model.setErrorText("Correo o contraseña inválidos")
+            }
+            keyboardController.value?.hide()
         })
     )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RegistrarContrasenya(
-    password: String,
-    confirmPassword: String,
-    onPasswordChange: (String) -> Unit,
-    onConfirmPasswordChange: (String) -> Unit,
-    onSingInClick: () -> Unit,
-    focusManager: FocusManager,
-    keyboardController: SoftwareKeyboardController?
-) {
+fun RegistrarContrasenya(model: LoginViewModel) {
+
+    val password = model.password.collectAsState()
+    val confirmPassword = model.confirmPassword.collectAsState()
+    val focusManager = model.focusManager.collectAsState()
+    val keyboardController = model.keyboardController.collectAsState()
+    val context = model.contexto.collectAsState()
+
     OutlinedTextField(
-        value = password,
-        onValueChange = { onPasswordChange(it) },
+        value = password.value,
+        onValueChange = { model.setPassword(it) },
         label = { Text(text = "Contraseña") },
         modifier = Modifier
             .fillMaxWidth()
@@ -349,12 +257,12 @@ fun RegistrarContrasenya(
             imeAction = ImeAction.Next, keyboardType = KeyboardType.Password
         ),
         keyboardActions = KeyboardActions(onNext = {
-            focusManager.moveFocus(FocusDirection.Down)
+            focusManager.value.moveFocus(FocusDirection.Down)
         })
     )
     OutlinedTextField(
-        value = confirmPassword,
-        onValueChange = { onConfirmPasswordChange(it) },
+        value = confirmPassword.value,
+        onValueChange = { model.setConfirmPassword(it) },
         label = { Text(text = "Repetir Contraseña") },
         modifier = Modifier
             .fillMaxWidth()
@@ -364,12 +272,11 @@ fun RegistrarContrasenya(
             imeAction = ImeAction.Done, keyboardType = KeyboardType.Password
         ),
         keyboardActions = KeyboardActions(onDone = {
-            if (password == confirmPassword) {
-                onSingInClick()
-                keyboardController?.hide()
-            } else {
-//                Toast.makeText(LocalContext.current, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
-            }
+            if (model.isContrasenyaConfirmed())
+                registerUser(context = context.value, email = model.getUserName(), password = model.getPassword(),
+                        onError = {model.setErrorText("Correo o contraseña inválidos")})
+            else model.setErrorText("Las contraseñas no coinciden")
+                keyboardController.value?.hide()
         })
     )
 }
@@ -391,20 +298,15 @@ fun BotonEnviarFormulario(onClick: () -> Unit, textoBoton: String) {
 }
 
 @Composable
-fun TextoRedirigir(onSigninClick: () -> Unit, textoInformacion : String, textoRedirigir : String) {
+fun TextoRedirigir(textoInformacion: String, textoRedirigir: String) {
+    val loginViewModel: LoginViewModel = viewModel()
+    val isLogin = loginViewModel.isLogin.collectAsState()
     Row {
-        Text(
-            text = textoInformacion, color = Color.DarkGray
-        )
+        Text(text = textoInformacion, color = Color.DarkGray)
         Text(text = textoRedirigir,
             color = AppColors.verde,
-            modifier = Modifier.clickable { onSigninClick() })
+            modifier = Modifier.clickable { loginViewModel.changeLoginState(!isLogin.value) })
     }
-}
-
-@Composable
-fun TextoContinuarCon() {
-    Text(text = "Continúa también con", color = Color.DarkGray)
 }
 
 @Composable
