@@ -9,12 +9,12 @@ class Song(){
     var albumId: String = ""
 
 
-    constructor(id: String?): this(){
+    constructor(id: String): this(){
         this.id = id
     }
 
     companion object {
-        suspend fun toObject(document: DocumentSnapshot): Song {
+        fun toObject(document: DocumentSnapshot): Song {
             val song = Song()
             song.id = document.getString("id") ?: ""
             song.name = document.getString("name") ?: ""

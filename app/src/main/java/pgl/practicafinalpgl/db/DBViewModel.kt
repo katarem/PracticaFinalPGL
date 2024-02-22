@@ -24,6 +24,11 @@ import kotlinx.coroutines.launch
 import pgl.practicafinalpgl.model.Album
 import pgl.practicafinalpgl.model.Playlist
 import pgl.practicafinalpgl.model.Song
+import pgl.practicafinalpgl.model.login.Admin
+import pgl.practicafinalpgl.model.login.Artist
+import pgl.practicafinalpgl.model.login.Permissions
+import pgl.practicafinalpgl.model.login.User
+import pgl.practicafinalpgl.model.login.UserType
 
 class DBViewModel : ViewModel() {
 
@@ -34,6 +39,9 @@ class DBViewModel : ViewModel() {
 
     private lateinit var listenerSongs: ListenerRegistration
     private lateinit var listenerAlbums: ListenerRegistration
+    private lateinit var listenerPlaylists: ListenerRegistration
+    private lateinit var listenerUsers: ListenerRegistration
+
 
     private var _listaAlbums = MutableStateFlow(mutableStateListOf<Album>())
     val listaAlbums = _listaAlbums.asStateFlow()
@@ -41,9 +49,11 @@ class DBViewModel : ViewModel() {
     private var _listaCanciones = MutableStateFlow(mutableStateListOf<Song>())
     val listaCanciones = _listaCanciones.asStateFlow()
 
-    private var _playlistRepository = MutableStateFlow(PlaylistRepository())
-    val playlistRepository = _playlistRepository.asStateFlow()
+    private var _listaPlaylists = MutableStateFlow(mutableStateListOf<Playlist>())
+    val listaPlaylists = _listaPlaylists.asStateFlow()
 
+    private var _listaUsers = MutableStateFlow(mutableStateListOf<UserType>())
+    val listaUsers = _listaUsers.asStateFlow()
 
     fun crearListenerSongs() {
         listenerSongs = conexion.collection("song").addSnapshotListener { datos, error ->
@@ -65,7 +75,7 @@ class DBViewModel : ViewModel() {
                         }
 
                         DocumentChange.Type.REMOVED -> {
-                            val newEntity = cambios.document.toObject<Song>()
+                            val newEntity = Song.toObject(cambios.document)
                             _listaCanciones.value.remove(newEntity)
                         }
                     }
@@ -73,11 +83,86 @@ class DBViewModel : ViewModel() {
             }
         }
     }
+    fun crearListenerPlaylists() {
+        listenerSongs = conexion.collection("playlist").addSnapshotListener { datos, error ->
+            if (error == null) {
+                datos?.documentChanges?.forEach { cambios ->
+                    when (cambios.type) {
+                        DocumentChange.Type.ADDED -> {
+                            viewModelScope.launch(Dispatchers.IO) {
+                                val playlist = Playlist.toObject(cambios.document)
+                                _listaPlaylists.value.add(playlist)
+                            }
+                        }
+
+                        DocumentChange.Type.MODIFIED -> {
+                            val newPlaylist = Playlist.toObject(cambios.document)
+                            val oldPlaylist = _listaPlaylists.value.filter { p -> p.id == newPlaylist.id }.first()
+                            _listaPlaylists.value.remove(oldPlaylist)
+                            _listaPlaylists.value.add(newPlaylist)
+                        }
+
+                        DocumentChange.Type.REMOVED -> {
+                            val newPlaylist = Playlist.toObject(cambios.document)
+                            _listaPlaylists.value.remove(newPlaylist)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun crearListenerUsers() {
+        listenerSongs = conexion.collection("user").addSnapshotListener { datos, error ->
+            if (error == null) {
+                datos?.documentChanges?.forEach { cambios ->
+                    when (cambios.type) {
+                        DocumentChange.Type.ADDED -> {
+                            viewModelScope.launch(Dispatchers.IO) {
+                                var user = UserType.toObject(cambios.document)
+                                user = when(user.permissions){
+                                    Permissions.USER -> user as User
+                                    Permissions.ADMIN -> user as Admin
+                                    Permissions.ARTIST -> user as Artist
+                                }
+                                _listaUsers.value.add(user)
+                            }
+                        }
+
+                        DocumentChange.Type.MODIFIED -> {
+                            var newUser = UserType.toObject(cambios.document)
+                            newUser = when(newUser.permissions){
+                                Permissions.USER -> newUser as User
+                                Permissions.ADMIN -> newUser as Admin
+                                Permissions.ARTIST -> newUser as Artist
+                            }
+                            val oldUser = _listaUsers.value.filter { u -> u.id == newUser.id }.first()
+                            _listaUsers.value.remove(oldUser)
+                            _listaUsers.value.add(newUser)
+                        }
+
+                        DocumentChange.Type.REMOVED -> {
+                            var user = UserType.toObject(cambios.document)
+                            user = when(user.permissions){
+                                Permissions.USER -> user as User
+                                Permissions.ADMIN -> user as Admin
+                                Permissions.ARTIST -> user as Artist
+                            }
+                            _listaUsers.value.remove(user)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     @Composable
     fun Initialize(){
         DisposableEffect(Unit) {
             crearListenerSongs()
             crearListenerAlbums()
+            crearListenerPlaylists()
             onDispose {
                 removeListenerSongs()
                 removeListenerAlbums()
@@ -125,32 +210,37 @@ class DBViewModel : ViewModel() {
         listenerAlbums.remove()
     }
 
+    fun removeListenerPlaylists(){
+        listenerPlaylists.remove()
+    }
+
+    fun removeListenerUsers(){
+        listenerUsers.remove()
+    }
+
     fun removeListenerSongs() {
         listenerSongs.remove()
     }
 
+
+
     fun removeListener() {
         listenerReg.remove()
     }
+// TODO AQUI TE DEJO EL CÓDIGO QUE TENÍA, DE TODAS FORMAS TIENES EL PROYECTO DE GRIFA, SORRY NO ME DA MÁS TIEMPO AHORA MISMO
 
-    fun addPlaylist(playlist: Playlist) {
-        _playlistRepository.value.insert(playlist)
-    }
-
-    fun modifyPlaylist(playlist: Playlist) {
-        _playlistRepository.value.update(playlist)
-    }
-
-    fun removePlaylist(playlist: Playlist): Boolean {
-        return _playlistRepository.value.remove(playlist)
-    }
-
-    fun getAllPlaylist(): List<Playlist> {
-        return _playlistRepository.value.getAll()
-    }
-
-    fun getPlaylistById(id: String): Playlist {
-        return _playlistRepository.value.getById(Playlist(id))
-    }
+//    fun addSong(){
+//        var nueva = Papa(marca = "munchitos",precio = 7.2,sabor = "original")
+//        conexion.collection("song").add(nueva)
+//    }
+//
+//    fun modificarPapa(papaAcambiar : Papa){
+//        conexion.collection("song")
+//            .document(papaAcambiar.idPapa).set(papaAcambiar)
+//    }
+//
+//    fun borrarPapa(papaAborrar: Papa){
+//        conexion.collection("song").document(papaAborrar.idPapa).delete()
+//    }
 
 }
