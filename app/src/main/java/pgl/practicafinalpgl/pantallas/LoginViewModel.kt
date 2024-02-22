@@ -8,15 +8,22 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 @OptIn(ExperimentalComposeUiApi::class)
-class LoginViewModel(context: Context, manager: FocusManager, controller: SoftwareKeyboardController?): ViewModel() {
+class LoginViewModel: ViewModel() {
+
+    fun addUIFunctions(context: Context, manager: FocusManager, controller: SoftwareKeyboardController?){
+        _context.value = context
+        _focusManager.value = manager
+        _keyboardController.value = controller
+    }
+
     //context
-    private var _context = MutableStateFlow(context)
+    private var _context = MutableStateFlow<Context?>(null)
     val contexto = _context.asStateFlow()
     //focusManager
-    private var _focusManager = MutableStateFlow(manager)
+    private var _focusManager = MutableStateFlow<FocusManager?>(null)
     val focusManager = _focusManager.asStateFlow()
     //keyboardController
-    private var _keyboardController = MutableStateFlow(controller)
+    private var _keyboardController = MutableStateFlow<SoftwareKeyboardController?>(null)
     val keyboardController = _keyboardController.asStateFlow()
     //username
     private var _username = MutableStateFlow("")

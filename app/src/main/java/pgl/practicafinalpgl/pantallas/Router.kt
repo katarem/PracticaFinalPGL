@@ -8,7 +8,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import io.github.katarem.piratify.pantallas.PantallaLogin
 import io.github.katarem.piratify.pantallas.PantallaUser
 import pgl.practicafinalpgl.Rutas.Rutas
 import pgl.practicafinalpgl.db.DBViewModel

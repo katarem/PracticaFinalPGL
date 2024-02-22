@@ -28,6 +28,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pgl.practicafinalpgl.R
+import pgl.practicafinalpgl.pantallas.Logo
+import pgl.practicafinalpgl.pantallas.TextoPiratify
 import pgl.practicafinalpgl.utils.AppColors
 
 @OptIn(ExperimentalComposeUiApi::class)

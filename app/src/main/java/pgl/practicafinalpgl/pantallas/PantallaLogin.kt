@@ -1,4 +1,4 @@
-package io.github.katarem.piratify.pantallas
+package pgl.practicafinalpgl.pantallas
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,21 +22,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -49,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import pgl.practicafinalpgl.R
-import pgl.practicafinalpgl.pantallas.LoginViewModel
 import pgl.practicafinalpgl.utils.AppColors
 import pgl.practicafinalpgl.utils.loginUser
 import pgl.practicafinalpgl.utils.registerUser
@@ -60,7 +53,8 @@ fun PantallaLogin() {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val loginViewModel = LoginViewModel(context, focusManager, keyboardController)
+    val loginViewModel: LoginViewModel = viewModel()
+    loginViewModel.addUIFunctions(context,focusManager,keyboardController)
     val isLogin = loginViewModel.isLogin.collectAsState()
 
     Box(
@@ -140,7 +134,7 @@ fun ContenidoSingIn(
         BotonEnviarFormulario(
             onClick = {
                 if(!model.isContrasenyaConfirmed()) model.setErrorText("Las contraseñas no son iguales")
-                else registerUser(model.contexto.value,model.getUserName(),model.getPassword(), onError = { model.setErrorText("Hubo error con el registro") }) },
+                else registerUser(model.contexto.value!!,model.getUserName(),model.getPassword(), onError = { model.setErrorText("Hubo error con el registro") }) },
             "Registrarse"
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -202,7 +196,7 @@ fun EntradaUsuario(viewModel: LoginViewModel) {
             imeAction = ImeAction.Next
         ),
         keyboardActions = KeyboardActions(onNext = {
-            focusManager.value.moveFocus(FocusDirection.Down)
+            focusManager.value!!.moveFocus(FocusDirection.Down)
         })
     )
 }
@@ -227,7 +221,7 @@ fun EntradaContrasenya(model: LoginViewModel) {
             imeAction = ImeAction.Done, keyboardType = KeyboardType.Password
         ),
         keyboardActions = KeyboardActions(onDone = {
-            loginUser(context.value, model.getUserName(), model.getPassword()) {
+            loginUser(context.value!!, model.getUserName(), model.getPassword()) {
                 model.setErrorText("Correo o contraseña inválidos")
             }
             keyboardController.value?.hide()
@@ -257,7 +251,7 @@ fun RegistrarContrasenya(model: LoginViewModel) {
             imeAction = ImeAction.Next, keyboardType = KeyboardType.Password
         ),
         keyboardActions = KeyboardActions(onNext = {
-            focusManager.value.moveFocus(FocusDirection.Down)
+            focusManager.value!!.moveFocus(FocusDirection.Down)
         })
     )
     OutlinedTextField(
@@ -273,7 +267,7 @@ fun RegistrarContrasenya(model: LoginViewModel) {
         ),
         keyboardActions = KeyboardActions(onDone = {
             if (model.isContrasenyaConfirmed())
-                registerUser(context = context.value, email = model.getUserName(), password = model.getPassword(),
+                registerUser(context = context.value!!, email = model.getUserName(), password = model.getPassword(),
                         onError = {model.setErrorText("Correo o contraseña inválidos")})
             else model.setErrorText("Las contraseñas no coinciden")
                 keyboardController.value?.hide()
