@@ -162,7 +162,7 @@ class DBViewModel : ViewModel() {
         DisposableEffect(Unit) {
             crearListenerSongs()
             crearListenerAlbums()
-            crearListenerPlaylists()
+            //crearListenerPlaylists() arreglar toObject
             onDispose {
                 removeListenerSongs()
                 removeListenerAlbums()

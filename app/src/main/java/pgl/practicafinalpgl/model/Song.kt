@@ -7,6 +7,7 @@ class Song(){
     var name: String = ""
     var artistId: String = ""
     var albumId: String = ""
+    var file: String = ""
 
 
     constructor(id: String): this(){

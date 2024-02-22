@@ -54,7 +54,7 @@ fun PantallaLogin() {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val loginViewModel: LoginViewModel = viewModel()
-    loginViewModel.addUIFunctions(context,focusManager,keyboardController)
+    loginViewModel.addUIFunctions(context, focusManager, keyboardController)
     val isLogin = loginViewModel.isLogin.collectAsState()
 
     Box(
@@ -133,8 +133,13 @@ fun ContenidoSingIn(
         Spacer(modifier = Modifier.height(16.dp))
         BotonEnviarFormulario(
             onClick = {
-                if(!model.isContrasenyaConfirmed()) model.setErrorText("Las contraseñas no son iguales")
-                else registerUser(model.contexto.value!!,model.getUserName(),model.getPassword(), onError = { model.setErrorText("Hubo error con el registro") }) },
+                if (!model.isContrasenyaConfirmed()) model.setErrorText("Las contraseñas no son iguales")
+                else registerUser(
+                    model.contexto.value!!,
+                    model.getUserName(),
+                    model.getPassword(),
+                    onError = { model.setErrorText("Hubo error con el registro") })
+            },
             "Registrarse"
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -266,11 +271,15 @@ fun RegistrarContrasenya(model: LoginViewModel) {
             imeAction = ImeAction.Done, keyboardType = KeyboardType.Password
         ),
         keyboardActions = KeyboardActions(onDone = {
-            if (model.isContrasenyaConfirmed())
-                registerUser(context = context.value!!, email = model.getUserName(), password = model.getPassword(),
-                        onError = {model.setErrorText("Correo o contraseña inválidos")})
-            else model.setErrorText("Las contraseñas no coinciden")
+            if (model.isContrasenyaConfirmed()) {
+                registerUser(context = context.value!!,
+                    email = model.getUserName(),
+                    password = model.getPassword(),
+                    onError = { model.setErrorText("Correo o contraseña inválidos") })
+            } else {
+                model.setErrorText("Las contraseñas no coinciden")
                 keyboardController.value?.hide()
+            }
         })
     )
 }
