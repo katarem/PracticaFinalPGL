@@ -18,6 +18,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +28,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import pgl.practicafinalpgl.Rutas.Rutas
 import pgl.practicafinalpgl.model.Album
 import pgl.practicafinalpgl.model.Song
@@ -33,6 +37,7 @@ import pgl.practicafinalpgl.utils.AppColors
 
 @Composable
 fun PantallaAlbum(album: Album, navController: NavController?) {
+    val scope = rememberCoroutineScope()
     Box(modifier = Modifier.background(AppColors.negro)) {
         Column(
             modifier = Modifier
@@ -58,7 +63,12 @@ fun PantallaAlbum(album: Album, navController: NavController?) {
                     CancionItem(
                         index = index,
                         cancion = cancion,
-                        onClick = { navController?.navigate(Rutas.PantallaAlbum.ruta + "${album.id}") })
+                        onClick = {
+                            scope.launch(Dispatchers.IO) {
+                                album.songs[index].loadPortrait()
+                            }
+                            navController?.navigate(Rutas.PantallaReproductor.ruta + "/${album.id}/$index/true")
+                        })
                 }
             })
             Text(

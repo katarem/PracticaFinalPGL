@@ -160,7 +160,7 @@ class DBViewModel : ViewModel() {
     @Composable
     fun Initialize(){
         DisposableEffect(Unit) {
-            crearListenerSongs()
+            //crearListenerSongs()
             crearListenerAlbums()
             //crearListenerPlaylists() arreglar toObject
             onDispose {

@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +36,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import pgl.practicafinalpgl.R
 import pgl.practicafinalpgl.Rutas.Rutas
 import pgl.practicafinalpgl.db.AlbumRepository
@@ -48,8 +51,9 @@ fun PantallaPlaylists(
     navController: NavController?, viewModel: DBViewModel
 ) {
     //val viewModel: DBViewModel = viewModel()
-    val albums = viewModel.listaAlbums.collectAsState()
+    val albums = viewModel.listaAlbums.collectAsState().value
     //viewModel.Initialize()
+
     Box(modifier = Modifier.background(AppColors.negro)) {
         Column(
             modifier = Modifier
@@ -63,7 +67,7 @@ fun PantallaPlaylists(
             )
             LazyRow(
                 content = {
-                    items(albums.value) { album ->
+                    items(albums) { album ->
                         Log.d("CHRIS_DEBUG", "Album: $album")
                         AlbumItem(
                             album = album
@@ -83,31 +87,47 @@ fun PantallaPlaylists(
 
 @Composable
 fun AlbumItem(album: Album, onClick: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    val portraitState = remember { mutableStateOf(album.portrait) }
+    val placeholder = painterResource(id = R.drawable.placeholder)
+
+    LaunchedEffect(album){
+        scope.launch(Dispatchers.IO) {
+            album.loadPortrait()
+            portraitState.value = album.portrait
+        }
+    }
+
     Card(modifier = Modifier
         .size(150.dp)
         .padding(5.dp)
         .clickable {
-            onClick(
-
-            )
+            onClick()
         }) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.background(AppColors.verde)
         ) {
-            album.portrait?.let {
+            if (portraitState.value != null) {
                 Image(
-                    bitmap = it.asImageBitmap(),
+                    bitmap = portraitState.value!!.asImageBitmap(),
                     contentDescription = album.name,
                     contentScale = ContentScale.FillBounds,
                     modifier = Modifier.weight(1f)
                 )
+            } else {
+                Image(
+                    painter = placeholder,
+                    contentDescription = "Placeholder",
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.weight(1f)
+                )
             }
+
             Text(
                 text = album.name,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
-
             )
         }
     }

@@ -27,6 +27,10 @@ class Album() {
         return "Album(id='$id', name='$name', releaseDate='$releaseDate', artistId='$artistId', portrait='$portraitURL', songs=$songs)"
     }
 
+    suspend fun loadPortrait(){
+        portrait = getPortrait(portraitURL)
+    }
+
     companion object {
         suspend fun toObject(document: DocumentSnapshot): Album {
             val album = Album()
@@ -35,7 +39,6 @@ class Album() {
             album.releaseDate = document.getString("releaseDate") ?: ""
             album.artistId = document.getString("artistId") ?: ""
             album.portraitURL = document.getString("portrait") ?: ""
-            album.portrait = getPortrait(album)
 
             val songRefs = document.get("songs") as List<DocumentReference>
             album.songs = ArrayList(fetchSongs(songRefs))
@@ -48,9 +51,9 @@ class Album() {
             }
         }
 
-        suspend fun getPortrait(album: Album): Bitmap {
+        suspend fun getPortrait(portraitURL: String): Bitmap {
             val fireBaseStorage = Firebase.storage
-            val portraitReference = fireBaseStorage.getReferenceFromUrl(album.portraitURL)
+            val portraitReference = fireBaseStorage.getReferenceFromUrl(portraitURL)
 
             val bytePortrait = portraitReference.getBytes(1024 * 1024).addOnSuccessListener {
                 Log.d("CHRIS_DEBUG", "Portada descargada")

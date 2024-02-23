@@ -21,10 +21,10 @@ import kotlinx.coroutines.launch
 import pgl.practicafinalpgl.model.Album
 import pgl.practicafinalpgl.model.Song
 
-class PlayerViewModel: ViewModel() {
+class PlayerViewModel(album: Album, index: Int, isShuffle: Boolean) : ViewModel() {
 
     //album o playlist elegido
-    private var _album = MutableStateFlow(Album())
+    private var _album = MutableStateFlow(album)
     val album = _album.asStateFlow()
     //Lista de canciones
     private var _canciones = MutableStateFlow(_album.value.songs)
@@ -38,7 +38,7 @@ class PlayerViewModel: ViewModel() {
     val exoPlayer = _exoPlayer.asStateFlow()
 
     //Canción actual
-    private var _currentSong = MutableStateFlow(canciones.value[index.value])
+    private var _currentSong = MutableStateFlow(canciones.value.get(index))
     val currentSong = _currentSong.asStateFlow()
 
     //Duración total
@@ -54,7 +54,7 @@ class PlayerViewModel: ViewModel() {
     val isRepeating = _isRepeating.asStateFlow()
 
     //Está Shuffled
-    private var _isShuffle = MutableStateFlow(false)
+    private var _isShuffle = MutableStateFlow(isShuffle)
     val isShuffle = _isShuffle.asStateFlow()
 
     //Reproduciendo o no
@@ -92,24 +92,26 @@ class PlayerViewModel: ViewModel() {
     //Crear Player
     fun createExoPlayer(context: Context){
         _exoPlayer.value = ExoPlayer.Builder(context).build()
-        exoPlayer.value!!.prepare()
+        exoPlayer.value?.prepare()
     }
 
     fun playSong(context: Context, audioFilePath: String) {
-        Firebase.storage.reference.child(audioFilePath).downloadUrl.addOnSuccessListener { uri ->
-            val player = ExoPlayer.Builder(context).build().apply {
+        Firebase.storage.getReferenceFromUrl(audioFilePath).downloadUrl.addOnSuccessListener { uri ->
+            ExoPlayer.Builder(context).build().apply {
                 setMediaItem(MediaItem.fromUri(uri.toString()))
                 prepare()
                 play()
                 addListener(getPlayerListener(context))
                 _exoPlayer.value = this
             }
+            Log.d("CHRIS_DEBUG", "Cancion descargada")
         }.addOnFailureListener {
             Log.d("CHRIS_DEBUG", "Error al descargar la cancion")
         }
+
     }
 
-    private fun getPlayerListener(context: Context) = object: Player.Listener {
+    private fun getPlayerListener(context: Context) = object: Player.Listener{
         override fun onPlaybackStateChanged(playbackState: Int) {
             when(playbackState){
                 Player.STATE_READY -> {
@@ -128,31 +130,6 @@ class PlayerViewModel: ViewModel() {
         }
     }
 
-    //Reproducir
-//    fun playSong(context: Context){
-//        val item = MediaItem.fromUri(obtenerRuta(context,currentSong.value.media))
-//        exoPlayer.value!!.setMediaItem(item)
-//        exoPlayer.value!!.play()
-//        exoPlayer.value!!.addListener(object: Player.Listener{
-//            override fun onPlaybackStateChanged(playbackState: Int) {
-//                when(playbackState){
-//                    Player.STATE_READY -> {
-//                        _duracion.value = _exoPlayer.value!!.duration.toInt()
-//                        viewModelScope.launch {
-//                            /* TODO: Actualizar el progreso usando currentPosition cada segundo */
-//                            while(isActive){
-//                                _progreso.value = _exoPlayer.value!!.currentPosition.toInt()
-//                                delay(1000)
-//                            }
-//                        }
-//                    }
-//                    //Player.STATE_BUFFERING->{}//nada basicamente
-//                    Player.STATE_ENDED->{nextSong(context)}
-//                    //Player.STATE_IDLE->{}
-//                }
-//            }
-//        })
-//    }
     // Este método se llama cuando el VM se destruya.
     override fun onCleared() {
         _exoPlayer.value!!.release()

@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import io.github.katarem.piratify.pantallas.PantallaReproductor
 import io.github.katarem.piratify.pantallas.PantallaUser
 import pgl.practicafinalpgl.Rutas.Rutas
 import pgl.practicafinalpgl.db.DBViewModel
@@ -24,6 +25,18 @@ fun Router() {
         NavHost(navController = navController, startDestination = Rutas.PantallaPlaylists.ruta) {
             composable(Rutas.PantallaLogin.ruta) {
                 PantallaLogin()
+            }
+            composable(Rutas.PantallaReproductor.ruta + "/{albumId}/{index}/{isShuffle}") {
+                val albumId = it.arguments?.getString("albumId")
+                val index = it.arguments?.getString("index")?.toInt()
+                val isShuffle = it.arguments?.getString("isShuffle")?.toBoolean()
+
+                val albumList by dbViewModel.listaAlbums.collectAsState()
+                val album = albumList.find { it.id == albumId }
+
+                if (album != null && index != null && isShuffle != null) {
+                    PantallaReproductor(album, index, isShuffle, navController = navController)
+                }
             }
             composable(Rutas.PantallaPlaylists.ruta) {
                 PantallaPlaylists(navController = navController, viewModel = dbViewModel)

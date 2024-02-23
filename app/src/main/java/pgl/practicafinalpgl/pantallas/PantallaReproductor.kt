@@ -25,15 +25,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import pgl.practicafinalpgl.db.PlayerViewModel
@@ -48,7 +49,7 @@ fun PantallaReproductor(
     index: Int,
     isShuffle: Boolean,
     navController: NavHostController) {
-    val model: PlayerViewModel = viewModel()
+    val model = PlayerViewModel(album, index, isShuffle)
     val context = LocalContext.current
 
     val cancionActual = model.currentSong.collectAsState()
@@ -100,16 +101,7 @@ fun PantallaReproductor(
         verticalArrangement = Arrangement.Center
     ) {
         SongInfoText(cancionActual.value)
-//        Image(
-//            painter = painterResource(id = R.drawable.),
-//            contentDescription = "",
-//            Modifier
-//                .fillMaxWidth()
-//                .padding(18.dp)
-//                .aspectRatio(1f)
-//                .clip(RoundedCornerShape(20.dp)),
-//            contentScale = ContentScale.Crop,
-//        )
+        AlbumImage(album)
         PlayerControls(model, cancionActual.value, album, index, isShuffle)
     }
 }
@@ -127,6 +119,44 @@ fun SongInfoText(cancionActual: Song) {
             //text = cancionActual.name + " - " + cancionActual.artista,
             fontSize = 25.sp,
             color = Color.White
+        )
+    }
+}
+
+@Composable
+fun AlbumImage(album: Album) {
+    val scope = rememberCoroutineScope()
+    val portraitState = remember { mutableStateOf(album.portrait) }
+    val placeholder = painterResource(id = R.drawable.placeholder)
+
+    LaunchedEffect(album) {
+        scope.launch(Dispatchers.IO) {
+            album.loadPortrait()
+            portraitState.value = album.portrait
+        }
+    }
+
+    if (portraitState.value != null) {
+        Image(
+            bitmap = portraitState.value!!.asImageBitmap(),
+            contentDescription = album.name,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp)
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(20.dp))
+        )
+    } else {
+        Image(
+            painter = placeholder,
+            contentDescription = "Placeholder",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp)
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(20.dp))
         )
     }
 }
@@ -154,8 +184,8 @@ fun PlayerControls(
 
     LaunchedEffect(Unit) {
         //setteamos el album que recibimos
-        model.changeAlbum(album, index, shuffleMode)
-        model.createExoPlayer(context)
+//        model.changeAlbum(album, index, shuffleMode)
+//        model.createExoPlayer(context)
         //model.playSong(context)
     }
 
@@ -171,7 +201,7 @@ fun PlayerControls(
         verticalArrangement = Arrangement.Center
     ) {
         Column {
-            SliderView(cancionActual)
+            SliderView(model)
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -229,8 +259,7 @@ fun durationParsed(tiempo: Int): String {
 
 
 @Composable
-fun SliderView(cancionActual: Song) {
-    val model: PlayerViewModel = viewModel()
+fun SliderView(model: PlayerViewModel) {
     val duracion = model.duracion.collectAsState()
     val progreso = model.progreso.collectAsState()
 
